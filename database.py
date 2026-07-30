@@ -1,5 +1,9 @@
 import psycopg2
+import psycopg2.extras
 import os
+from dotenv import load_dotenv
+load_dotenv()
+psycopg2.extras.register_uuid()
 
 DATABASE_URL = os.getenv('DATABASE_URL')
 

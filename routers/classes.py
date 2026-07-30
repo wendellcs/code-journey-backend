@@ -5,7 +5,7 @@ from database import get_connection
 
 router = APIRouter(prefix='/classes')
 
-@router.post('/classes/add', status_code = status.HTTP_201_CREATED)
+@router.post('/add', status_code = status.HTTP_201_CREATED)
 def create_class(class_data: ClassesSchema, db = Depends(get_connection)):
     connection, cursor = db
     

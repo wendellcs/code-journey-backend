@@ -1,9 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
-import psycopg2
 import os 
-from routers import classes
+from routers import classes, technologies
 
 app = FastAPI()
 load_dotenv()
@@ -19,3 +18,4 @@ app.add_middleware(
 )
 
 app.include_router(classes.router)
+app.include_router(technologies.router)
