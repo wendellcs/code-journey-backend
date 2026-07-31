@@ -23,8 +23,8 @@ def create_student(student_data: StudentsSchema, db = Depends(get_connection)):
     connection , cursor = db 
     
     try:
-        cursor.execute('INSERT INTO students (first_name, last_name, age, class_id, tag) VALUES (%s, %s, %s, %s, %s)',
-            (student_data.first_name, student_data.last_name, student_data.age, student_data.class_id, student_data.tag))
+        cursor.execute('INSERT INTO students (first_name, last_name, age, class_id, tag, current_module) VALUES (%s, %s, %s, %s, %s, %s)',
+            (student_data.first_name, student_data.last_name, student_data.age, student_data.class_id, student_data.tag, student_data.current_module))
         connection.commit()
     except psycopg2.errors.CheckViolation:
         connection.rollback()
