@@ -6,6 +6,18 @@ from database import get_connection
 
 router = APIRouter(prefix='/students')
 
+@router.get('/all')
+def get_all_students(db = Depends(get_connection)):
+    _, cursor = db
+    
+    cursor.execute('SELECT * FROM students')
+    students = cursor.fetchall()
+    
+    if students:
+        return students
+    else:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Students not found.')
+
 @router.post('/add', status_code=status.HTTP_201_CREATED)
 def create_student(student_data: StudentsSchema, db = Depends(get_connection)):
     connection , cursor = db 

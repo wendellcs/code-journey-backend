@@ -9,8 +9,8 @@ DATABASE_URL = os.getenv('DATABASE_URL')
 
 def get_connection():
     connection = psycopg2.connect(DATABASE_URL)
-    cursor = connection.cursor()
-
+    cursor = connection.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        
     try:
         yield connection, cursor
         

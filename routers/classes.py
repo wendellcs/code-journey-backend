@@ -16,7 +16,7 @@ def find_class(module:str, day_of_week:str, class_time:time , db = Depends(get_c
     class_id = cursor.fetchone()
     
     if class_id:
-        return class_id[0]
+        return class_id
     else:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Class not found.')
    
