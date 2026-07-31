@@ -21,4 +21,16 @@ def count_registered_data(db = Depends(get_connection)):
         return total 
     else:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='We could not find data to count.')
-
+    
+    
+@router.get('/metrics', status_code=status.HTTP_200_OK)
+def count_registered_data(db = Depends(get_connection)):
+    _, cursor = db 
+    
+    cursor.execute("SELECT COUNT(*) AS total FROM technologies WHERE created_at > NOW() - INTERVAL '7 days';")
+    total = cursor.fetchone()
+    
+    if total:
+        return total 
+    else:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='We could not find data to count.')
