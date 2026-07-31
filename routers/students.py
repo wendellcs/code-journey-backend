@@ -1,10 +1,36 @@
 from fastapi import APIRouter, Depends, status, HTTPException
 from schemas.studentsSchema import StudentsSchema
 import psycopg2
-from database import get_connection
+from database import get_connection, count_rows
+import math
 
 
 router = APIRouter(prefix='/students')
+
+@router.get('', status_code=status.HTTP_200_OK)
+def get_students(limit: int = 4, page: int = 1, filter:str = 'created_at', db = Depends(get_connection)):
+    _, cursor = db 
+    
+    if limit < 2:
+        limit = 2
+    
+    offset = (page - 1) * limit
+    
+    if filter != 'created_at' and filter != 'first_name':
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Invalid filter. Allowed values are: created_at, first_name.')
+    
+    cursor.execute(f'SELECT * FROM students ORDER BY {filter} LIMIT %s OFFSET %s',
+        (limit, offset))
+    
+    students = cursor.fetchall()
+    total_students = count_rows(cursor)
+
+    return {
+        'students': students,
+        'current_page': page,
+        'total_pages': math.ceil(total_students / limit)
+    }
+
 
 @router.get('/all', status_code=status.HTTP_200_OK)
 def get_all_students(db = Depends(get_connection)):
@@ -17,8 +43,8 @@ def get_all_students(db = Depends(get_connection)):
         return students
     else:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Students not found.')
-
-
+    
+    
 @router.post('/add', status_code=status.HTTP_201_CREATED)
 def create_student(student_data: StudentsSchema, db = Depends(get_connection)):
     connection , cursor = db 
