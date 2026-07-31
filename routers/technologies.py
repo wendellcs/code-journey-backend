@@ -8,7 +8,6 @@ router = APIRouter(prefix='/techs')
 @router.post('/add', status_code=status.HTTP_201_CREATED)
 def create_technology(tech_data: TechnologiesSchema, db = Depends(get_connection)):
     connection, cursor = db
-    print(tech_data)
 
     try:
         cursor.execute('INSERT INTO technologies ( name, course_id, tech_icon ) VALUES (%s, %s, %s)',
