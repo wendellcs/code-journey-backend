@@ -6,7 +6,7 @@ from database import get_connection
 
 router = APIRouter(prefix='/students')
 
-@router.get('/all')
+@router.get('/all', status_code=status.HTTP_200_OK)
 def get_all_students(db = Depends(get_connection)):
     _, cursor = db
     
@@ -19,7 +19,7 @@ def get_all_students(db = Depends(get_connection)):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Students not found.')
 
 
-@router.get('/total')
+@router.get('/total', status_code=status.HTTP_200_OK)
 def count_students(db = Depends(get_connection)):
     _, cursor = db 
     
