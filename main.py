@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 import os 
-from routers import classes, technologies, students
+from routers import classes, technologies, students, general
 
 app = FastAPI()
 load_dotenv()
@@ -17,6 +17,7 @@ app.add_middleware(
     allow_headers=['*']
 )
 
+app.include_router(general.router)
 app.include_router(classes.router)
 app.include_router(technologies.router)
 app.include_router(students.router)

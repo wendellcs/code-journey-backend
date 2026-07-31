@@ -19,19 +19,6 @@ def get_all_students(db = Depends(get_connection)):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Students not found.')
 
 
-@router.get('/total', status_code=status.HTTP_200_OK)
-def count_students(db = Depends(get_connection)):
-    _, cursor = db 
-    
-    cursor.execute('SELECT COUNT(*) AS total FROM students')
-    total = cursor.fetchone()
-    
-    if total:
-        return total 
-    else:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Something went wrong while counting the students.')
-
-
 @router.post('/add', status_code=status.HTTP_201_CREATED)
 def create_student(student_data: StudentsSchema, db = Depends(get_connection)):
     connection , cursor = db 
