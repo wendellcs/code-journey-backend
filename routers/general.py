@@ -6,7 +6,7 @@ router = APIRouter(prefix='/general')
 
 
 @router.get('/total', status_code=status.HTTP_200_OK)
-def count_registered_data(db = Depends(get_connection)):
+def count_total_data(db = Depends(get_connection)):
     _, cursor = db 
     
     total = {

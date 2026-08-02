@@ -22,12 +22,12 @@ def get_connection():
         connection.close()
 
 
-def count_rows(cursor, table_name: str = 'students') -> int:
-    
+def count_rows(cursor, table_name: str = 'students', where_clause: str = '', where_values: tuple = ()) -> int:
+        
     allowed_table_names = ['students', 'technologies', 'classes']
     if table_name not in allowed_table_names:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Invalid table.')
     
-    cursor.execute(f'SELECT COUNT(*) FROM {table_name}')
+    cursor.execute(f'SELECT COUNT(*) FROM {table_name} {where_clause}', (where_values,))
     
     return cursor.fetchone()['count']

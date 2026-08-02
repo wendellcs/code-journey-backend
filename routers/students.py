@@ -8,22 +8,31 @@ import math
 router = APIRouter(prefix='/students')
 
 @router.get('', status_code=status.HTTP_200_OK)
-def get_students(limit: int = 4, page: int = 1, filter:str = 'created_at', db = Depends(get_connection)):
+def get_students(search: str = None, limit: int = 4, page: int = 1, filter:str = 'created_at', db = Depends(get_connection)):
     _, cursor = db 
     
     if limit < 2:
         limit = 2
-    
+        
     offset = (page - 1) * limit
     
     if filter != 'created_at' and filter != 'first_name':
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Invalid filter. Allowed values are: created_at, first_name.')
     
-    cursor.execute(f'SELECT * FROM students ORDER BY {filter} LIMIT %s OFFSET %s',
-        (limit, offset))
+    where_clause = ''
+    
+    if search:
+        where_clause = 'WHERE first_name ILIKE %s'
+        search_term = f'%{search}%'
+        execute_values = (search_term, limit, offset)
+    else:
+        execute_values = (limit, offset)
+        
+    cursor.execute(f'SELECT * FROM students {where_clause} ORDER BY {filter} LIMIT %s OFFSET %s',
+        execute_values)
     
     students = cursor.fetchall()
-    total_students = count_rows(cursor)
+    total_students = count_rows(cursor, 'students', where_clause, search_term if search else '')
 
     return {
         'students': students,
