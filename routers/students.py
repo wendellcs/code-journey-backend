@@ -71,3 +71,18 @@ def create_student(student_data: StudentsSchema, db = Depends(get_connection)):
     except psycopg2.errors.ForeignKeyViolation:
         connection.rollback()
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='The referenced class was not found.')
+    
+    
+@router.delete('/remove/{student_id}', status_code=status.HTTP_200_OK)
+def delete_student(student_id: str, db = Depends(get_connection)):
+    connection, cursor = db
+    
+    cursor.execute('DELETE FROM students WHERE id = %s', (student_id,))
+        
+    if cursor.rowcount == 0:
+        connection.rollback()
+        raise HTTPException(status_code= status.HTTP_404_NOT_FOUND, detail='Student not found')
+    
+    connection.commit()
+    
+    return {'ok': 'Student successfully deleted.'}
