@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from typing import Optional
 import uuid
 
 class StudentsSchema(BaseModel):
@@ -8,3 +9,10 @@ class StudentsSchema(BaseModel):
     age: int 
     tag: str | None = None
     class_id: uuid.UUID | None = None
+    
+class EditStudentSchema(BaseModel):
+    id: str
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    current_module: Optional[str] = None
+    tag: Optional[str] = None
