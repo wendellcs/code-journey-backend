@@ -1,9 +1,32 @@
 from fastapi import APIRouter, Depends, status, HTTPException
 from schemas.technologiesSchema import TechnologiesSchema
 import psycopg2
-from database import get_connection
+from database import get_connection, count_rows
+import math
 
 router = APIRouter(prefix='/techs')
+
+@router.get('/all', status_code=status.HTTP_200_OK)
+def get_all_techs(page: int = 1 , limit:int = 4, db = Depends(get_connection)):
+    _, cursor = db 
+    
+    if limit < 2:
+        limit = 2
+        
+    offset = (page - 1) * limit
+    
+    cursor.execute(f'SELECT * FROM technologies ORDER BY created_at LIMIT %s OFFSET %s',
+        (limit, offset))
+    
+    techs = cursor.fetchall()
+    total_techs = count_rows(cursor, 'technologies')
+
+    return {
+        'techs': techs,
+        'current_page': page,
+        'total_pages': math.ceil(total_techs / limit)
+    }
+    
 
 @router.post('/add', status_code=status.HTTP_201_CREATED)
 def create_technology(tech_data: TechnologiesSchema, db = Depends(get_connection)):
