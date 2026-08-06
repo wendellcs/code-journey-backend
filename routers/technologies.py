@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, status, HTTPException
-from schemas.technologiesSchema import TechnologiesSchema
+from schemas.technologiesSchema import TechnologiesSchema, EditTechnologiesSchema
 import psycopg2
 from database import get_connection, count_rows
 import math
@@ -48,6 +48,36 @@ def create_technology(tech_data: TechnologiesSchema, db = Depends(get_connection
 
     return {'ok': 'Tech successfully registeredd.'}
 
+
+@router.patch('/edit', status_code=status.HTTP_200_OK)
+def edit_tech(new_data: EditTechnologiesSchema, db = Depends(get_connection)):
+    connection, cursor = db
+    clauses = []
+    execute_values = []
+
+    if new_data.name:
+        clauses.append('name = %s')
+        execute_values.append(new_data.name)
+    if new_data.tech_icon:
+        clauses.append('tech_icon = %s')
+        execute_values.append(new_data.tech_icon)
+    if new_data.course_id:
+        clauses.append('course_id = %s')
+        execute_values.append(new_data.course_id)
+        
+    set_clause = ', '.join(clauses)
+
+    try:
+        cursor.execute(f'UPDATE technologies SET {set_clause} WHERE id = %s', (*execute_values, new_data.id))
+        if cursor.rowcount == 0:
+            connection.rollback()
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Tech not found')
+        
+        connection.commit()
+    except psycopg2.errors.DataError: 
+        connection.rollback()
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail='Invalid data format')
+    
 
 @router.delete('/remove/{tech_id}', status_code=status.HTTP_200_OK)
 def delete_tech(tech_id: str, db = Depends(get_connection)):
