@@ -58,3 +58,18 @@ def create_class(class_data: ClassesSchema, db = Depends(get_connection)):
         raise HTTPException(status_code = status.HTTP_409_CONFLICT, detail = 'This class is already registered.')
     
     return {'ok': 'Class successfully registered.'}
+
+
+@router.delete('/remove/{class_id}', status_code=status.HTTP_200_OK)
+def delete_class(class_id: str, db = Depends(get_connection)):
+    connection, cursor = db
+    
+    cursor.execute('DELETE FROM classes WHERE id = %s', (class_id,))
+        
+    if cursor.rowcount == 0:
+        connection.rollback()
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Class not found')
+    
+    connection.commit()
+    
+    return {'ok': 'Class successfully deleted.'}
