@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, status, HTTPException
-from schemas.classesSchema import ClassesSchema
+from schemas.classesSchema import ClassesSchema, EditClassesSchema
 import psycopg2
 from datetime import time
 from database import get_connection, count_rows
@@ -59,6 +59,36 @@ def create_class(class_data: ClassesSchema, db = Depends(get_connection)):
     
     return {'ok': 'Class successfully registered.'}
 
+
+@router.patch('/edit', status_code=status.HTTP_200_OK)
+def edit_class(new_data: EditClassesSchema, db = Depends(get_connection)):
+    connection, cursor = db
+    clauses = []
+    execute_values = []
+
+    if new_data.module:
+        clauses.append('module = %s')
+        execute_values.append(new_data.module)
+    if new_data.day_of_week:
+        clauses.append('day_of_week = %s')
+        execute_values.append(new_data.day_of_week)
+    if new_data.class_time:
+        clauses.append('class_time = %s')
+        execute_values.append(new_data.class_time)
+        
+    set_clause = ', '.join(clauses)
+
+    try:
+        cursor.execute(f'UPDATE classes SET {set_clause} WHERE id = %s', (*execute_values, new_data.id))
+        if cursor.rowcount == 0:
+            connection.rollback()
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Class not found')
+        
+        connection.commit()
+    except psycopg2.errors.DataError: 
+        connection.rollback()
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail='Invalid data format')
+    
 
 @router.delete('/remove/{class_id}', status_code=status.HTTP_200_OK)
 def delete_class(class_id: str, db = Depends(get_connection)):
