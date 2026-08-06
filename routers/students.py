@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, status, HTTPException
-from schemas.studentsSchema import StudentsSchema, EditStudentSchema
+from schemas.studentsSchema import StudentsSchema, EditStudentSchema, StudentSkillSchema
 import psycopg2
 from database import get_connection, count_rows
 import math
@@ -71,6 +71,29 @@ def create_student(student_data: StudentsSchema, db = Depends(get_connection)):
     except psycopg2.errors.ForeignKeyViolation:
         connection.rollback()
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='The referenced class was not found.')
+
+
+@router.post('/{student_id}/skills', status_code=status.HTTP_201_CREATED)
+def set_student_skill(student_id: str, skill_data: StudentSkillSchema, db = Depends(get_connection)):
+    connection, cursor = db
+
+    execute_values = [student_id, skill_data.technology_id, skill_data.independence_level]
+    insert_clause = 'student_id, technology_id, independence_level'
+    values_clause = '%s, %s, %s'
+    
+    if skill_data.notes:
+        execute_values.append(skill_data.notes)
+        insert_clause += ', notes'
+        values_clause += ', %s'
+        
+    try:
+        cursor.execute(f'INSERT INTO student_skills ({insert_clause}) VALUES ({values_clause})',
+            (*execute_values,))
+        connection.commit()
+        
+    except psycopg2.errors.ForeignKeyViolation:
+        connection.rollback()
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='The referenced class or student was not found.')
     
     
 @router.patch('/edit', status_code=status.HTTP_200_OK)

@@ -16,3 +16,8 @@ class EditStudentSchema(BaseModel):
     last_name: Optional[str] = None
     current_module: Optional[str] = None
     tag: Optional[str] = None
+    
+class StudentSkillSchema(BaseModel):
+    technology_id: uuid.UUID | None = None
+    independence_level: int
+    notes: str = None 
