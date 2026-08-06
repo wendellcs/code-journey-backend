@@ -2,9 +2,32 @@ from fastapi import APIRouter, Depends, status, HTTPException
 from schemas.classesSchema import ClassesSchema
 import psycopg2
 from datetime import time
-from database import get_connection
+from database import get_connection, count_rows
+import math
 
 router = APIRouter(prefix='/classes')
+
+@router.get('/all', status_code=status.HTTP_200_OK)
+def get_all_classes(page: int = 1 , limit:int = 4, db = Depends(get_connection)):
+    _, cursor = db 
+    
+    if limit < 2:
+        limit = 2
+        
+    offset = (page - 1) * limit
+    
+    cursor.execute(f'SELECT * FROM classes ORDER BY created_at LIMIT %s OFFSET %s',
+        (limit, offset))
+    
+    classes = cursor.fetchall()
+    total_classes = count_rows(cursor, 'classes')
+
+    return {
+        'classes': classes,
+        'current_page': page,
+        'total_pages': math.ceil(total_classes / limit)
+    }
+    
 
 @router.get('/find', status_code=status.HTTP_200_OK)
 def find_class(module:str, day_of_week:str, class_time:time , db = Depends(get_connection)):
