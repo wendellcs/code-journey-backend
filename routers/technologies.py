@@ -6,8 +6,8 @@ import math
 
 router = APIRouter(prefix='/techs')
 
-@router.get('/all', status_code=status.HTTP_200_OK)
-def get_all_techs(page: int = 1 , limit:int = 4, db = Depends(get_connection)):
+@router.get('', status_code=status.HTTP_200_OK)
+def get_techs(page: int = 1 , limit:int = 4, db = Depends(get_connection)):
     _, cursor = db 
     
     if limit < 2:
@@ -26,6 +26,19 @@ def get_all_techs(page: int = 1 , limit:int = 4, db = Depends(get_connection)):
         'current_page': page,
         'total_pages': math.ceil(total_techs / limit)
     }
+    
+
+@router.get('/all', status_code=status.HTTP_200_OK)
+def get_all_techs(db = Depends(get_connection)):
+    _, cursor = db
+    
+    cursor.execute('SELECT * FROM technologies')
+    techs = cursor.fetchall()
+    
+    if techs:
+        return techs
+    else:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Technologies not found.')
     
 
 @router.post('/add', status_code=status.HTTP_201_CREATED)
