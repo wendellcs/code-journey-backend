@@ -47,3 +47,18 @@ def create_technology(tech_data: TechnologiesSchema, db = Depends(get_connection
         raise HTTPException(status_code= status.HTTP_404_NOT_FOUND, detail='Referenced course does not exist.')
 
     return {'ok': 'Tech successfully registeredd.'}
+
+
+@router.delete('/remove/{tech_id}', status_code=status.HTTP_200_OK)
+def delete_tech(tech_id: str, db = Depends(get_connection)):
+    connection, cursor = db
+    
+    cursor.execute('DELETE FROM technologies WHERE id = %s', (tech_id,))
+        
+    if cursor.rowcount == 0:
+        connection.rollback()
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Tech not found')
+    
+    connection.commit()
+    
+    return {'ok': 'Tech successfully deleted.'}
