@@ -48,10 +48,7 @@ def get_all_students(db = Depends(get_connection)):
     cursor.execute('SELECT * FROM students')
     students = cursor.fetchall()
     
-    if students:
-        return students
-    else:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Students not found.')
+    return students
     
     
 @router.get('/{student_id}/skills', status_code=status.HTTP_200_OK)
