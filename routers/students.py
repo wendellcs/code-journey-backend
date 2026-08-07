@@ -54,6 +54,22 @@ def get_all_students(db = Depends(get_connection)):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Students not found.')
     
     
+@router.get('/{student_id}/skills')
+def get_student_skills(student_id: str, db = Depends(get_connection)):
+    _, cursor = db 
+    
+    cursor.execute('''SELECT student_skills.*, technologies.name, technologies.tech_icon
+        FROM student_skills JOIN technologies ON student_skills.technology_id = technologies.id
+        WHERE student_skills.student_id = %s''', (student_id,))
+    
+    student_skills = cursor.fetchall()
+    
+    if student_skills:
+        return student_skills
+    else:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Students not found.')
+    
+    
 @router.post('/add', status_code=status.HTTP_201_CREATED)
 def create_student(student_data: StudentsSchema, db = Depends(get_connection)):
     connection , cursor = db 
