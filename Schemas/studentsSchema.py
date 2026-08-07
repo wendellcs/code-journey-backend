@@ -21,3 +21,7 @@ class StudentSkillSchema(BaseModel):
     technology_id: uuid.UUID
     independence_level: int
     notes: str = None 
+    
+class EditStudentSkillSchema(BaseModel):
+    independence_level: Optional[int] = None
+    notes: Optional[str] = None

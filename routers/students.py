@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, status, HTTPException
-from schemas.studentsSchema import StudentsSchema, EditStudentSchema, StudentSkillSchema
+from schemas.studentsSchema import StudentsSchema, EditStudentSchema, StudentSkillSchema, EditStudentSkillSchema
 import psycopg2
 from database import get_connection, count_rows
 import math
@@ -112,6 +112,39 @@ def set_student_skill(student_id: str, skill_data: StudentSkillSchema, db = Depe
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='The referenced student was not found.')
     
     
+@router.patch('/{id}/skills', status_code=status.HTTP_200_OK)
+def edit_student_skills(id: str, student_skill_data: EditStudentSkillSchema, db = Depends(get_connection)):
+    connection, cursor = db
+    clauses = []
+    execute_values = []
+    
+    if student_skill_data.independence_level is not None:
+        clauses.append('independence_level = %s')
+        execute_values.append(student_skill_data.independence_level)
+        
+    if student_skill_data.notes is not None:
+        clauses.append('notes = %s')
+        execute_values.append(student_skill_data.notes)
+    
+    set_clause = ', '.join(clauses)
+    
+    if not clauses:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Not enough data")
+    
+    try:
+        cursor.execute(f'UPDATE student_skills SET {set_clause} WHERE id = %s', (*execute_values, id))
+        
+        if cursor.rowcount == 0:
+            connection.rollback()
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Student not found')
+        connection.commit()
+    except psycopg2.errors.DataError: 
+        connection.rollback()
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail='Invalid data format')
+    
+    return {'ok': 'Skill successfully updated.'}
+
+
 @router.patch('/edit', status_code=status.HTTP_200_OK)
 def edit_student(new_data: EditStudentSchema, db = Depends(get_connection)):
     connection, cursor = db
