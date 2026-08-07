@@ -109,7 +109,7 @@ def set_student_skill(student_id: str, skill_data: StudentSkillSchema, db = Depe
         
     except psycopg2.errors.ForeignKeyViolation:
         connection.rollback()
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='The referenced class or student was not found.')
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='The referenced student was not found.')
     
     
 @router.patch('/edit', status_code=status.HTTP_200_OK)
