@@ -75,6 +75,40 @@ def get_students_skill_summary(student_id: str, db = Depends(get_connection)):
     student_skills = cursor.fetchall()
     return student_skills
 
+
+@router.get('/leaders', status_code=status.HTTP_200_OK)
+def get_leaders(db = Depends(get_connection)):
+    _, cursor = db 
+    
+    cursor.execute('''SELECT 
+            students.id, 
+            students.first_name, 
+            students.last_name, 
+            classes.module, 
+            COUNT(*) as topics_mastered,
+            SUM(student_skills.independence_level) as points
+            FROM student_skills
+            JOIN students ON student_skills.student_id = students.id
+            JOIN classes ON students.class_id = classes.id
+            WHERE student_skills.independence_level > 2
+            GROUP BY students.id, students.first_name, students.last_name, classes.module
+            ORDER BY points DESC''')
+    
+    students = cursor.fetchall()
+    
+    students_by_modules = {}
+    
+    for student in students:
+        module = student['module']
+        if module not in students_by_modules:
+            students_by_modules[module] = []
+        
+        if len(students_by_modules[module]) >= 2:
+            continue
+        
+        students_by_modules[module].append(student)
+        
+    return students_by_modules
     
 @router.post('/add', status_code=status.HTTP_201_CREATED)
 def create_student(student_data: StudentsSchema, db = Depends(get_connection)):
