@@ -107,6 +107,29 @@ def get_leaders(db = Depends(get_connection)):
             continue
         
         students_by_modules[module].append(student)
+    
+    module_list = ['Young 1', 'Young 2', 'Young 3', 'Young 4']
+    
+    for module in module_list:
+        if module not in students_by_modules:
+            students_by_modules[module] = [{
+                'first_name': 'Bot',
+                'last_name': 'Mariza',
+                'module': module,
+                'topics_mastered': 3,
+                'points': 15
+            }, {
+                'first_name': 'Bot',
+                'last_name': 'Mina',
+                'module': module,
+                'topics_mastered': 2,
+                'points': 10
+            }]
+        
+    students_by_modules = dict(sorted(
+        students_by_modules.items(),
+        key=lambda item: int(item[0].split()[-1])
+    ))
         
     return students_by_modules
     
