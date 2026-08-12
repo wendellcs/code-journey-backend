@@ -7,8 +7,8 @@ import math
 
 router = APIRouter(prefix='/classes')
 
-@router.get('/all', status_code=status.HTTP_200_OK)
-def get_all_classes(page: int = 1 , limit:int = 4, db = Depends(get_connection)):
+@router.get('', status_code=status.HTTP_200_OK)
+def get_classes(page: int = 1 , limit:int = 4, db = Depends(get_connection)):
     _, cursor = db 
     
     if limit < 2:
@@ -27,6 +27,16 @@ def get_all_classes(page: int = 1 , limit:int = 4, db = Depends(get_connection))
         'current_page': page,
         'total_pages': math.ceil(total_classes / limit)
     }
+    
+
+@router.get('/all', status_code=status.HTTP_200_OK)
+def get_all_classes(db = Depends(get_connection)):
+    _, cursor = db 
+    
+    cursor.execute('SELECT * FROM classes')
+    classes = cursor.fetchall()
+    
+    return classes
     
 
 @router.get('/find', status_code=status.HTTP_200_OK)
