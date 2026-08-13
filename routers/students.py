@@ -3,7 +3,7 @@ from schemas.studentsSchema import StudentsSchema, EditStudentSchema, StudentSki
 import psycopg2
 from database import get_connection, count_rows
 import math
-
+from security import verify_token
 
 router = APIRouter(prefix='/students')
 
@@ -133,7 +133,7 @@ def get_leaders(db = Depends(get_connection)):
         
     return students_by_modules
     
-@router.post('/add', status_code=status.HTTP_201_CREATED)
+@router.post('/add', status_code=status.HTTP_201_CREATED, dependencies=[Depends(verify_token)])
 def create_student(student_data: StudentsSchema, db = Depends(get_connection)):
     connection , cursor = db 
     
@@ -152,7 +152,7 @@ def create_student(student_data: StudentsSchema, db = Depends(get_connection)):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='The referenced class was not found.')
 
 
-@router.post('/{student_id}/skills', status_code=status.HTTP_201_CREATED)
+@router.post('/{student_id}/skills', status_code=status.HTTP_201_CREATED, dependencies=[Depends(verify_token)])
 def set_student_skill(student_id: str, skill_data: StudentSkillSchema, db = Depends(get_connection)):
     connection, cursor = db
 
@@ -175,7 +175,7 @@ def set_student_skill(student_id: str, skill_data: StudentSkillSchema, db = Depe
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='The referenced student was not found.')
     
     
-@router.patch('/{id}/skills', status_code=status.HTTP_200_OK)
+@router.patch('/{id}/skills', status_code=status.HTTP_200_OK, dependencies=[Depends(verify_token)])
 def edit_student_skills(id: str, student_skill_data: EditStudentSkillSchema, db = Depends(get_connection)):
     connection, cursor = db
     clauses = []
@@ -208,7 +208,7 @@ def edit_student_skills(id: str, student_skill_data: EditStudentSkillSchema, db 
     return {'ok': 'Skill successfully updated.'}
 
 
-@router.patch('/edit', status_code=status.HTTP_200_OK)
+@router.patch('/edit', status_code=status.HTTP_200_OK, dependencies=[Depends(verify_token)])
 def edit_student(new_data: EditStudentSchema, db = Depends(get_connection)):
     connection, cursor = db
     clauses = []
@@ -243,7 +243,7 @@ def edit_student(new_data: EditStudentSchema, db = Depends(get_connection)):
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail='Invalid data format')
     
     
-@router.delete('/remove/{student_id}', status_code=status.HTTP_200_OK)
+@router.delete('/remove/{student_id}', status_code=status.HTTP_200_OK, dependencies=[Depends(verify_token)])
 def delete_student(student_id: str, db = Depends(get_connection)):
     connection, cursor = db
     

@@ -4,6 +4,7 @@ import psycopg2
 from datetime import time
 from database import get_connection, count_rows
 import math
+from security import verify_token
 
 router = APIRouter(prefix='/classes')
 
@@ -54,7 +55,7 @@ def find_class(module:str, day_of_week:str, class_time:time , db = Depends(get_c
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Class not found.')
    
 
-@router.post('/add', status_code = status.HTTP_201_CREATED)
+@router.post('/add', status_code = status.HTTP_201_CREATED, dependencies=[Depends(verify_token)])
 def create_class(class_data: ClassesSchema, db = Depends(get_connection)):
     connection, cursor = db
     
@@ -70,7 +71,7 @@ def create_class(class_data: ClassesSchema, db = Depends(get_connection)):
     return {'ok': 'Class successfully registered.'}
 
 
-@router.patch('/edit', status_code=status.HTTP_200_OK)
+@router.patch('/edit', status_code=status.HTTP_200_OK, dependencies=[Depends(verify_token)])
 def edit_class(new_data: EditClassesSchema, db = Depends(get_connection)):
     connection, cursor = db
     clauses = []
@@ -100,7 +101,7 @@ def edit_class(new_data: EditClassesSchema, db = Depends(get_connection)):
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail='Invalid data format')
     
 
-@router.delete('/remove/{class_id}', status_code=status.HTTP_200_OK)
+@router.delete('/remove/{class_id}', status_code=status.HTTP_200_OK, dependencies=[Depends(verify_token)])
 def delete_class(class_id: str, db = Depends(get_connection)):
     connection, cursor = db
     

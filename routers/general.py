@@ -1,5 +1,4 @@
 from fastapi import APIRouter, Depends, status, HTTPException
-import psycopg2
 from database import get_connection, count_rows
 
 router = APIRouter(prefix='/general')

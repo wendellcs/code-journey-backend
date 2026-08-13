@@ -3,6 +3,7 @@ from schemas.technologiesSchema import TechnologiesSchema, EditTechnologiesSchem
 import psycopg2
 from database import get_connection, count_rows
 import math
+from security import verify_token
 
 router = APIRouter(prefix='/techs')
 
@@ -41,7 +42,7 @@ def get_all_techs(db = Depends(get_connection)):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Technologies not found.')
     
 
-@router.post('/add', status_code=status.HTTP_201_CREATED)
+@router.post('/add', status_code=status.HTTP_201_CREATED, dependencies=[Depends(verify_token)])
 def create_technology(tech_data: TechnologiesSchema, db = Depends(get_connection)):
     connection, cursor = db
 
@@ -62,7 +63,7 @@ def create_technology(tech_data: TechnologiesSchema, db = Depends(get_connection
     return {'ok': 'Tech successfully registeredd.'}
 
 
-@router.patch('/edit', status_code=status.HTTP_200_OK)
+@router.patch('/edit', status_code=status.HTTP_200_OK, dependencies=[Depends(verify_token)])
 def edit_tech(new_data: EditTechnologiesSchema, db = Depends(get_connection)):
     connection, cursor = db
     clauses = []
@@ -92,7 +93,7 @@ def edit_tech(new_data: EditTechnologiesSchema, db = Depends(get_connection)):
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail='Invalid data format')
     
 
-@router.delete('/remove/{tech_id}', status_code=status.HTTP_200_OK)
+@router.delete('/remove/{tech_id}', status_code=status.HTTP_200_OK, dependencies=[Depends(verify_token)])
 def delete_tech(tech_id: str, db = Depends(get_connection)):
     connection, cursor = db
     
