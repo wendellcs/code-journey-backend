@@ -7,11 +7,16 @@ from routers import classes, technologies, students, general
 app = FastAPI()
 load_dotenv()
 
-ORIGIN = os.getenv('ORIGIN')
+DEV_ORIGIN = os.getenv('DEV_ORIGIN')
+PROD_ORIGIN = os.getenv('PROD_ORIGIN')
+
+origins_list = [DEV_ORIGIN, PROD_ORIGIN]
+
+ALLOWED_ORIGINS = [url for url in origins_list if url]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[ORIGIN],
+    allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=['*'],
     allow_headers=['*']
