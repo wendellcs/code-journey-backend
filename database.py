@@ -9,10 +9,9 @@ psycopg2.extras.register_uuid()
 
 DATABASE_URL = os.getenv('DATABASE_URL')
 
-
 def get_connection():
     is_vercel = os.getenv('VERCEL') == '1'
-    
+
     if is_vercel:
         connection = psycopg2.connect(DATABASE_URL, sslmode='require')
     else: 
