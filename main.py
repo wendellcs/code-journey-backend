@@ -2,7 +2,11 @@ from fastapi import FastAPI, Response
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 import os 
+import sys
 from routers import classes, technologies, students, general
+
+current_dir = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(current_dir)
 
 app = FastAPI()
 load_dotenv()
