@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, status, HTTPException
 from database import get_connection, count_rows
+from security import verify_token
 
 router = APIRouter(prefix='/general')
 
@@ -28,3 +29,11 @@ def count_registered_data(db = Depends(get_connection)):
         return total 
     else:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='We could not find data to count.')
+
+
+@router.get('/validate_token', status_code=status.HTTP_200_OK, dependencies=[Depends(verify_token)])
+def validate_token():
+    return {
+        'valid': True, 
+        'message': 'Token successfully verified!'
+    }
