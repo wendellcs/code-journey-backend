@@ -11,7 +11,13 @@ DATABASE_URL = os.getenv('DATABASE_URL')
 
 
 def get_connection():
-    connection = psycopg2.connect(DATABASE_URL)
+    is_vercel = os.getenv('VERCEL') == '1'
+    
+    if is_vercel:
+        connection = psycopg2.connect(DATABASE_URL, sslmode='require')
+    else: 
+        connection = psycopg2.connect(DATABASE_URL)
+
     cursor = connection.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
         
     try:
