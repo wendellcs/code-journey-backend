@@ -5,11 +5,24 @@ import os
 import sys
 from routers import classes, technologies, students, general
 
-current_dir = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(current_dir)
 
 app = FastAPI()
 load_dotenv()
+
+from fastapi import Request
+import traceback
+
+@app.middleware("http")
+async def catch_exceptions_middleware(request: Request, call_next):
+    try:
+        return await call_next(request)
+    except Exception as e:
+        print("--- ERRO DO SERVIDOR CAPTURADO ---")
+        traceback.print_exc()
+        raise e
+
+current_dir = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(current_dir)
 
 @app.get("/favicon.ico", include_in_schema=False)
 async def favicon():
